@@ -23,7 +23,7 @@ def text_to_image(text, image_name):
 def read_image(image_name):
   img = Image.open(image_name)
   img_arr = np.array(img)
-  return [x for x in img_arr.flatten() if x != 0]
+  return [x for x in img_arr.flatten()]
 
 def lsb_encode(text, b64, image_name='image'):
   text_num = [ord(x) for x in text] 
@@ -67,12 +67,12 @@ def lsb_encode(text, b64, image_name='image'):
       image_arr[row, col] |= text_chunk[i]
 
   img = Image.fromarray(image_arr.astype(np.uint8), 'RGB' if image_arr.ndim == 3 else 'L')
-  # img.save(f'{image_name}.png')
+
   print(f"Image saved as {image_name}.png")
   return img
 
-def lsb_decode(image_path):
-  text_chunk = read_image(image_path)
+def lsb_decode(b64):
+  text_chunk = b64toi(b64).flatten()
   text_chunk = [x & 0b11 for x in text_chunk]
   text = list()
 
@@ -83,10 +83,9 @@ def lsb_decode(image_path):
     text[text_idx] += text_chunk[i] << (6 - (i % 4) * 2)
     
     if i % 4 == 3 and text[text_idx] == 127:  # Null terminator check
-      text[text_idx] = 0
       break
 
-  return text
+  return text[:-1]
 
 def itoa(i_arr):
   c_arr = [chr(num) for num in i_arr]
